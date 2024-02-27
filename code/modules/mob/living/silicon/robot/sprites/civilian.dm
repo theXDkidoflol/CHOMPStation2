@@ -167,14 +167,6 @@
 	sprite_icon_state = "zoomba"
 	has_dead_sprite = TRUE
 
-/datum/robot_sprite/service/worm //CHOMPAdd Start
-	name = "W02M"
-	sprite_icon_state = "worm-service"
-	has_custom_open_sprites = TRUE
-	sprite_icon = 'modular_chomp/icons/mob/wormborg.dmi'
-	has_vore_belly_sprites = TRUE
-	has_dead_sprite = TRUE //CHOMPAdd End
-
 // Wide/dogborg sprites
 
 /datum/robot_sprite/dogborg/service
@@ -197,13 +189,13 @@
 	name = "Hound V2"
 	sprite_icon_state = "vale"
 	has_eye_light_sprites = TRUE
-	has_vore_belly_sprites = FALSE
+	has_vore_belly_sprites = TRUE
 
 /datum/robot_sprite/dogborg/service/valedark
 	name = "Hound V2 Darkmode"
 	sprite_icon_state = "valedark"
 	has_eye_light_sprites = TRUE
-	has_vore_belly_sprites = FALSE
+	has_vore_belly_sprites = TRUE
 
 /datum/robot_sprite/dogborg/service/drake
 	name = "Drake"
@@ -231,11 +223,11 @@
 	else
 		ourborg.icon_state = booze_options[ourborg.sprite_extra_customization["boozehound"]]
 
-/datum/robot_sprite/dogborg/service/booze/get_belly_overlay(var/mob/living/silicon/robot/ourborg, var/size = 1)
-	if(!("boozehound" in ourborg.sprite_extra_customization) || !ourborg.sprite_extra_customization["boozehound"])
+/datum/robot_sprite/dogborg/service/booze/get_belly_overlay(var/mob/living/silicon/robot/ourborg, var/size = 1, var/b_class) //CHOMPEdit for multibelly handling
+	if(!("boozehound" in ourborg.sprite_extra_customization) || !ourborg.sprite_extra_customization["boozehound"] || b_class != "sleeper") //CHOMPEdit for multibelly handling
 		return ..()
 	else
-		return "[booze_options[ourborg.sprite_extra_customization["boozehound"]]]-sleeper-[size]"
+		return "[booze_options[ourborg.sprite_extra_customization["boozehound"]]]-[b_class]-[size]" //CHOMPEdit for multibelly handling
 
 /datum/robot_sprite/dogborg/service/booze/get_rest_sprite(var/mob/living/silicon/robot/ourborg)
 	if(!(ourborg.rest_style in rest_sprite_options))

@@ -21,6 +21,14 @@
 	do_colouration = 1
 	color_blend_mode = ICON_MULTIPLY
 
+/datum/sprite_accessory/wing/xeno_queen
+	name = "xenomorph backplate (queen)"
+	desc = ""
+	icon = 'modular_chomp/icons/mob/human_races/sprite_accessories/wings.dmi'
+	icon_state = "xeno_queen"
+	do_colouration = 1
+	color_blend_mode = ICON_MULTIPLY
+
 /datum/sprite_accessory/wing/teshbee
 	name = "Teshari bee wings"
 	desc = ""
@@ -49,6 +57,26 @@
 	do_colouration = 1
 	color_blend_mode = ICON_MULTIPLY
 	extra_overlay = "dragon_2_mark"
+
+/datum/sprite_accessory/wing/cloakwings
+	name = "Cloaking Moth Wings with Eyes (Colorable)"
+	desc = ""
+	icon = 'modular_chomp/icons/mob/human_races/sprite_accessories/wings.dmi'
+	icon_state = "cloakmoth"
+	do_colouration = 1
+	color_blend_mode = ICON_MULTIPLY
+	extra_overlay = "cloakmoth_eyes"
+
+/datum/sprite_accessory/wing/jet_wing
+	name = "Aeromorph Jet Wings (Colorable)"
+	desc = ""
+	icon = 'modular_chomp/icons/mob/human_races/sprite_accessories/wings.dmi'
+	icon_state = "jet_wing"
+	do_colouration = 1
+	color_blend_mode = ICON_MULTIPLY
+	extra_overlay = "jet_wing_1"
+	extra_overlay2 = "jet_wing_2"
+
 
 /// XENO BACKPLATES ///
 
@@ -94,6 +122,15 @@
 	desc = ""
 	icon = 'modular_chomp/icons/mob/human_races/sprite_accessories/wings64.dmi'
 	icon_state = "sectdrone_wing_alt_nomark"
+	do_colouration = 1
+	color_blend_mode = ICON_MULTIPLY
+	wing_offset = 16
+
+/datum/sprite_accessory/wing/taurdragon
+	name = "Taur wings (Draconian)"
+	desc = ""
+	icon = 'modular_chomp/icons/mob/human_races/sprite_accessories/wings64.dmi'
+	icon_state = "taurdrake_wing"
 	do_colouration = 1
 	color_blend_mode = ICON_MULTIPLY
 	wing_offset = 16

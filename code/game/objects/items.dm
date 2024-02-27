@@ -226,11 +226,12 @@
 
 /obj/item/attack_hand(mob/living/user as mob)
 	if (!user) return
+	..()
 	if(anchored) // Start CHOMPStation Edit
 		if(hascall(src, "attack_self"))
 			return src.attack_self(user)
 		else
-			to_chat ("This is anchored and you can't lift it.")
+			to_chat (user, "This is anchored and you can't lift it.")
 		return // End CHOMPStation Edit
 	if (hasorgans(user))
 		var/mob/living/carbon/human/H = user
@@ -268,7 +269,7 @@
 			ghost.assumeform(src)
 			ghost.animate_towards(user)
 	//VORESTATION EDIT START. This handles possessed items.
-	if(src.possessed_voice && src.possessed_voice.len && !(user.ckey in warned_of_possession)) //Is this item possessed?
+	if(src.possessed_voice && src.possessed_voice.len > 1 && !(user.ckey in warned_of_possession)) // CHOMPEdit Is this item possessed?
 		warned_of_possession |= user.ckey
 		tgui_alert_async(user,{"
 		THIS ITEM IS POSSESSED BY A PLAYER CURRENTLY IN THE ROUND. This could be by anomalous means or otherwise.

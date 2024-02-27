@@ -319,7 +319,7 @@
 	name = "paperwork printer"
 	//name = "paper dispenser"
 	icon = 'icons/obj/bureaucracy.dmi'
-	icon_state = "paper_bin1"
+	icon_state = "doc_printer_mod_pre"
 	item_icons = list(
 			slot_l_hand_str = 'icons/mob/items/lefthand_material.dmi',
 			slot_r_hand_str = 'icons/mob/items/righthand_material.dmi',
@@ -338,33 +338,39 @@
 		deploy_paper(get_turf(target))
 
 /obj/item/weapon/form_printer/attack_self(mob/user as mob)
-	deploy_paper(get_turf(src))
+	deploy_paper()
 
-/obj/item/weapon/form_printer/proc/deploy_paper(var/turf/T)
+/obj/item/weapon/form_printer/proc/deploy_paper()
 	var/choice = tgui_alert(usr, "Would you like dispense and empty page or print a form?", "Dispense", list("Paper","Form"))
 	if(!choice || choice == "Cancel")
 		return
 	switch(choice)
 		if("Paper")
-			T.visible_message("<span class='notice'>\The [src.loc] dispenses a sheet of crisp white paper.</span>")
-			new /obj/item/weapon/paper(T)
+			flick("doc_printer_mod_ejecting", src)
+			spawn(22)
+				var/turf/T = get_turf(src)
+				T.visible_message("<span class='notice'>\The [src.loc] dispenses a sheet of crisp white paper.</span>")
+				new /obj/item/weapon/paper(T)
 		if ("Form")
 			var/list/content = print_form()
 			if(!content)
 				to_chat(usr, "<span class='warning'>No form for this category found in central network. Central is advising employees to upload new forms whenever possible.</span>")
 				return
-			T.visible_message("<span class='notice'>\The [src.loc] dispenses an official form to fill.</span>")
-			new /obj/item/weapon/paper(T, content[1], content[2])
+			flick("doc_printer_mod_printing", src)
+			spawn(22)
+				var/turf/T = get_turf(src)
+				T.visible_message("<span class='notice'>\The [src.loc] dispenses an official form to fill.</span>")
+				new /obj/item/weapon/paper(T, content[1], content[2])
 
 /obj/item/weapon/form_printer/proc/print_form()
 	var/list/paper_forms = list("Empty", "Command", "Security", "Supply", "Science", "Medical", "Engineering", "Service", "Exploration", "Event", "Other", "Mercenary")
-	var/list/command_paper_forms = list("COM-0002: Dismissal Order", "COM-0003: Job Change Request", "COM-0004: ID Replacement Request", "COM-0005: Access Change Order", "COM-0006: Formal Complaint", "COM-0009: Visitor Permit", "COM-0012: Personnel Request Form")
+	var/list/command_paper_forms = list("COM-0002: Dismissal Order", "COM-0003: Job Change Request", "COM-0004: ID Replacement Request", "COM-0005: Access Change Order", "COM-0006: Formal Complaint", "COM-0009: Visitor Permit", "COM-0012: Personnel Request Form", "COM-0013: Employee of the Month Nomination Form")
 	var/list/security_paper_forms = list("SEC-1001: Shift-Start Checklist", "SEC-1002: Patrol Assignment Sheet", "SEC-1003: Incident Report", "SEC-1004: Arrest Report", "SEC-1005: Arrest Warrant", "SEC-1006: Search Warrant", "SEC-1007: Forensics Investigation Report", "SEC-1008: Interrogation Report", "SEC-1009: Witness Statement", "SEC-1010: Armory Inventory", "SEC-1011: Armory Equipment Request", "SEC-1012: Armory Equipment Deployment", "SEC-1013: Weapon Permit", "SEC-1014: Injunction")
 	var/list/supply_paper_forms = list("SUP-2001: Delivery of Goods", "SUP-2002: Delivery of Resources", "SUP-2003: Material Stock")
 	var/list/science_paper_forms = list("SCI-3003: Cyborg / Robot Inspection", "SCI-3004: Cyborg / Robot Upgrades", "SCI-3009: Xenoflora Genetics Report")
 	var/list/medical_paper_forms = list("MED-4001: Death Certificate", "MED-4002: Prescription", "MED-4003: Against Medical Advice", "MED-4004: Cyborgification Contract", "MED-4005: Mental Health Patient Intake", "MED-4006: NIF Surgery", "MED-4007: Psychiatric Evaluation")
 	var/list/engineering_paper_forms = list("ENG-5001: Building Permit")
-	var/list/service_paper_forms = list()
+	var/list/service_paper_forms = list("SER-6005: Certificate of Marriage")
 	var/list/exploration_paper_forms = list()
 	var/list/event_paper_forms = list()
 	var/list/other_paper_forms = list("OTHR-9001: Emergency Transmission", "OTHR-9032: Ownership Transfer")
@@ -434,7 +440,7 @@
 			split = splittext(mercenary_paper, ": ")
 		else
 			return
-	return list(select_form(split[1]), split[1] + ": " + split[2])
+	return list(select_form(split[1], split[2]), split[1] + ": " + split[2])
 
 /obj/item/weapon/form_printer/proc/select_form(paperid, name)
 	var/content = ""
@@ -462,6 +468,9 @@
 		if("COM-0012")
 			content = @{"[grid][row][cell][b]Sender:[/b] [cell][field][br][row][cell][b]Position:[/b] [cell][field][/grid][br][hr][br][b]Personnel Needed:[/b][br][table][br][row][cell]Exploration[cell][field][br][row][cell]Cargo[cell][field][br][row][cell]Medical[cell][field][br][row][cell]Service[cell][field][br][row][cell]Security[cell][field][br][row][cell]Science[cell][field][br][row][cell]Engineering[cell][field][br][row][cell]Command[cell][field][br][/table][br][small]Leave blank if none[/small][br][h3]Reason:[/h3] [field][br][br][hr][grid][row][cell][list][b]Signed:[/b][/list][cell][br][row][cell][list] - [large][field][/large][/list][cell][/grid]"}
 			revision = "Revision: 1.2"
+		if("COM-0013")
+			content = @{"[center][i]Recognizing outstanding contributions and achievements[/i][/center][hr][b]Nominator Information[/b][table][row][cell]Full Name:[cell][field][row][cell]Department:[cell][field][row][cell]Contact Email:[cell][field][/table][hr][b]Nominee Details[/b][table][row][cell]Nominee's Full Name:[cell][field][row][cell]Nominee's Department:[cell][field][row][cell]Date of Nomination:[cell][field][/table][hr][b]Nomination Justification[/b][br][i]Please provide a detailed explanation of why the nominee deserves the Employee of the Month award. Highlight specific achievements, contributions to team goals, or any exemplary behavior.[/i][br][br][field][hr][b]Supporting Documents[/b][br][i]Include any relevant documents, such as performance reports or commendations, that support your nomination.[/i][br][br][field][hr][b]Endorsements[/b][br][i]List any additional endorsements from colleagues or supervisors. Include their names and brief statements of support.[/i][br][br][field][hr][b]Approval[/b][table][row][cell]Nominator's Signature:[cell][field][row][cell]Department Head Signature:[cell][field][row][cell]HOP Review Signature:[cell][field][/table]"}
+			revision = "Revision: 1.1"
 		//Security forms, SEC-1
 		if("SEC-1001")
 			content = @{"The following is a checklist of actions generally considered useful or essential to perform at the start of a work shift, or as soon as possible otherwise. Please sign to the right of each item when completed. If necessary, you may put notes regarding the work item after your signature.[br][hr][center][table][br][row][cell]All secure doors inspected and maintained if necessary[cell][field][br][row][cell]All cells cleaned[cell][field][br][row][cell]Brig cleaned and repaired if necessary[cell][field][br][row][cell]Armory inventory completed (see SEC-1010)[cell][field][br][row][cell]Security records checked for important information[cell][field][br][row][cell](optional) Patrol assignments given (see SEC-1002)[cell][field][br][row][cell]Cadets/Junior Officers assigned supervising officer if necessary[cell][field][br][/table][/center][br][hr][grid][row][cell][list][b]Officer on duty signature:[/b][/list][cell][br][row][cell][list] - [large][field][/large][/list][cell][/grid]"}
@@ -552,6 +561,9 @@
 			content = @{"[grid][row][cell][b]Location:[/b] [cell][field][br][row][cell][b]Purpose:[/b] [cell][field][/grid][br][hr][br]I, [[u][field][/u]] certify that I have reviewed and approved of provided blueprints. I have verified that design will be structurally sound and fall within building guidelines. I and any others participating in its construction will ensure that the blueprint will be followed.[br][br][br][b]Blueprint:[/b] [field][br][br][hr][grid][row][cell][list][b]Constructing Engineer signature:[/b][/list][cell][list][list][list][list][list][b]Chief Engineer signature:[/b][/list][/list][/list][/list][/list][cell][br][row][cell][list] - [field][/list][cell][list][list][list][list][list]- [large][field][/large][/list][/list][/list][/list][/list][cell][/grid]"}
 			revision = "Revision 1.1"
 		//Service forms, SER-6
+		if("SER-6005")
+			content = @{"[hr][br][center]This is to certify that[br][br][u]_[field]_[/u] and [u]_[field]_[/u][br][br]were united in marriage at [u]_[field]_[/u] on date [u]_[field]_[/u][br][br][hr][grid][row][cell][list][b]Bride:[/b][/list][cell][cell][list][list][list][list][b]Groom:[/b][/list][/list][/list][/list][cell][row][cell][list] - [large][field][/large][/list][cell][cell][list][list][list][list]- [large][field][/large][/list][/list][/list][/list][cell][/grid][hr][br][b]Chaplain:[/b] [large][field][/large]"}
+			revision = "Revision 1.4"
 		//Explorer forms, EXP-7
 		//Event forms, EVNT-8
 		//Other forms, OTHR-9

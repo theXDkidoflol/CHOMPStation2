@@ -7,9 +7,19 @@
 [i]Transponder[/i]: Transmitting (CIV), Vir IFF
 [b]Notice[/b]: The Vir government welcomes you to this world."}
 
-	map_z = list(Z_LEVEL_SURFACE, Z_LEVEL_SURFACE_MINE, Z_LEVEL_SURFACE_WILD, Z_LEVEL_SURFACE_SKYLANDS)
+	map_z = list(Z_LEVEL_SURFACE, Z_LEVEL_SURFACE_MINE, Z_LEVEL_SURFACE_WILD, Z_LEVEL_SURFACE_VALLEY)
+	//Z_LEVEL_SURFACE_SKYLANDS, //removed due to lack of use
 
-	map_z = list(Z_LEVEL_SURFACE, Z_LEVEL_SURFACE_MINE, Z_LEVEL_SURFACE_WILD, Z_LEVEL_SURFACE_SKYLANDS, Z_LEVEL_SURFACE_VALLEY)
+	initial_generic_waypoints = list(
+		"outpost_nw",
+		"outpost_s",
+		"outpost_w",
+		"wilderness_s",
+		"wilderness_se",
+		"wilderness_w",
+		"wilderness_n",
+		"valley_e"
+		)
 
 	in_space = 0
 	start_x  = 10
@@ -41,7 +51,8 @@
 
 /obj/effect/overmap/visitable/sector/Southern_Cross
 	name = "Southern Cross"
-	icon_state = "object"
+	icon = 'modular_chomp/icons/obj/overmap.dmi'
+	icon_state = "southerncross"
 	desc = "Southern Cross station, orbiting Sif."
 	scanner_desc = @{"[i]Registration[/i]: NLS Southern Cross
 [i]Class[/i]: Installation
@@ -53,7 +64,8 @@
 	start_y =  10
 	known = 1 // lets Sectors appear on shuttle navigation for easy finding.
 
-	extra_z_levels = list(Z_LEVEL_TRANSIT, Z_LEVEL_MISC,Z_LEVEL_SURFACE, Z_LEVEL_SURFACE_MINE, Z_LEVEL_SURFACE_WILD, Z_LEVEL_SURFACE_SKYLANDS, Z_LEVEL_SURFACE_VALLEY) //This should allow for comms to reach people from the station. Basically this defines all the areas of Southern Cross and the Sif local system on the overmap.
+	extra_z_levels = list(Z_LEVEL_TRANSIT, Z_LEVEL_MISC,Z_LEVEL_SURFACE, Z_LEVEL_SURFACE_MINE, Z_LEVEL_SURFACE_WILD, Z_LEVEL_SURFACE_VALLEY) //This should allow for comms to reach people from the station. Basically this defines all the areas of Southern Cross and the Sif local system on the overmap.
+	// "Z_LEVEL_SURFACE_SKYLANDS, " //removed due to lack of use
 
 	initial_generic_waypoints = list(
 		"d1_aux_a",

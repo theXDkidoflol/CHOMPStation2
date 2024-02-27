@@ -32,10 +32,16 @@
 
 /mob/new_player/proc/new_player_panel_proc()
 	var/output = "<div align='center'>"
-	/* VOREStation Removal
-	output += "[using_map.get_map_info()]"
-	output +="<hr>"
-	VOREStation Removal End */
+
+	output += "<b>Map:</b> [using_map.full_name]<br>"
+	output += "<b>Station Time:</b> [stationtime2text()]<br>"
+
+	if(!ticker || ticker.current_state <= GAME_STATE_PREGAME)
+		output += "<b>Server Initializing!</b>"
+	else
+		output += "<b>Round Duration:</b> [roundduration2text()]<br>"
+	output += "<hr>"
+
 	output += "<p><a href='byond://?src=\ref[src];show_preferences=1'>Character Setup</A></p>"
 
 	if(!ticker || ticker.current_state <= GAME_STATE_PREGAME)
@@ -53,6 +59,8 @@
 
 	output += "<hr>" //ChompADD - a line divider between functional and info buttons
 
+	/*
+	//nobody uses this feature
 	if(!IsGuestKey(src.key))
 		establish_db_connection()
 
@@ -60,7 +68,7 @@
 			var/isadmin = 0
 			if(src.client && src.client.holder)
 				isadmin = 1
-			var/DBQuery/query = SSdbcore.NewQuery("SELECT id FROM erro_poll_question WHERE [(isadmin ? "" : "adminonly = false AND")] Now() BETWEEN starttime AND endtime AND id NOT IN (SELECT pollid FROM erro_poll_vote WHERE ckey = :t_ckey) AND id NOT IN (SELECT pollid FROM erro_poll_textreply WHERE ckey = :t_ckey)",list("t_ckey" = ckey)) //CHOMPEdit TGSQL
+			var/datum/db_query/query = SSdbcore.NewQuery("SELECT id FROM erro_poll_question WHERE [(isadmin ? "" : "adminonly = false AND")] Now() BETWEEN starttime AND endtime AND id NOT IN (SELECT pollid FROM erro_poll_vote WHERE ckey = :t_ckey) AND id NOT IN (SELECT pollid FROM erro_poll_textreply WHERE ckey = :t_ckey)",list("t_ckey" = ckey)) //CHOMPEdit TGSQL
 			query.Execute()
 			var/newpoll = 0
 			while(query.NextRow())
@@ -71,6 +79,7 @@
 				output += "<p><b><a href='byond://?src=\ref[src];showpoll=1'>Show Player Polls</A><br>(NEW!)</b></p>" //ChompEDIT - fixed height
 			else
 				output += "<p><a href='byond://?src=\ref[src];showpoll=1'>Show Player Polls</A><br><i>No Changes</i></p>" //ChompEDIT - fixed height
+	*/
 
 	if(client.check_for_new_server_news())
 		output += "<p><b><a href='byond://?src=\ref[src];shownews=1'>Show Server News</A><br>(NEW!)</b></p>" //ChompEDIT 'Game updates' --> 'Server news'
@@ -103,7 +112,7 @@
 		client.prefs.lastlorenews = GLOB.news_data.newsindex
 		SScharacter_setup.queue_preferences_save(client.prefs)
 
-	panel = new(src, "Welcome","Welcome", 210, 360, src) // VOREStation Edit //ChompEDIT, height 300 -> 360
+	panel = new(src, "Welcome","Welcome", 210, 400, src) // VOREStation Edit //ChompEDIT, height 300 -> 400
 	panel.set_window_options("can_close=0")
 	panel.set_content(output)
 	panel.open()
@@ -129,7 +138,14 @@
 			var/datum/job/refJob = null
 			for(var/mob/new_player/player in player_list)
 				refJob = player.client.prefs.get_highest_job()
-				stat("Player", (player.ready)?("(Playing as: [(refJob)?(refJob.title):("Unknown")])"):(null)) //CHOMPEDIT: Anonymizing [player.key]
+				if(player.client.prefs.obfuscate_key && player.client.prefs.obfuscate_job)
+					stat("Anonymous User", (player.ready)?("Ready!"):(null))
+				else if(player.client.prefs.obfuscate_key)
+					stat("Anonymous User", (player.ready)?("(Playing as: [(refJob)?(refJob.title):("Unknown")])"):(null))
+				else if(player.client.prefs.obfuscate_job)
+					stat("[player.key]", (player.ready)?("Ready!"):(null))
+				else
+					stat("[player.key]", (player.ready)?("(Playing as: [(refJob)?(refJob.title):("Unknown")])"):(null))
 				totalPlayers++
 				if(player.ready)totalPlayersReady++
 
@@ -152,7 +168,7 @@
 		new_player_panel_proc()
 
 	if(href_list["observe"])
-		if(tgui_alert(src,"Are you sure you wish to observe? If you do, make sure to not use any knowledge gained from observing if you decide to join later.","Player Setup",list("Yes","No")) == "Yes")
+		if(tgui_alert(src,"Are you sure you wish to observe? If you do, make sure to not use any knowledge gained from observing if you decide to join later.","Observe Round?",list("Yes","No")) == "Yes")
 			if(!client)	return 1
 
 			//Make a new mannequin quickly, and allow the observer to take the appearance
@@ -192,7 +208,7 @@
 	if(href_list["late_join"])
 
 		if(!ticker || ticker.current_state != GAME_STATE_PLAYING)
-			to_chat(usr, "<font color='red'>The round is either not ready, or has already finished...</font>")
+			to_chat(usr, span_red("The round is either not ready, or has already finished..."))
 			return
 
 		var/time_till_respawn = time_till_respawn()
@@ -251,7 +267,7 @@
 		var/voted = 0
 
 		//First check if the person has not voted yet.
-		var/DBQuery/query = SSdbcore.NewQuery("SELECT * FROM erro_privacy WHERE ckey=:t_ckey", list("t_ckey" = src.ckey)) //CHOMPEdit TGSQL
+		var/datum/db_query/query = SSdbcore.NewQuery("SELECT * FROM erro_privacy WHERE ckey=:t_ckey", list("t_ckey" = src.ckey)) //CHOMPEdit TGSQL
 		query.Execute()
 		while(query.NextRow())
 			voted = 1
@@ -278,7 +294,7 @@
 		if(!voted)
 			var/list/sqlargs = list("t_ckey" = src.ckey, "t_option" = "[option]") //CHOMPEdit TGSQL
 			var/sql = "INSERT INTO erro_privacy VALUES (null, Now(), :t_ckey, :t_option)" //CHOMPEdit TGSQL
-			var/DBQuery/query_insert = SSdbcore.NewQuery(sql,sqlargs) //CHOMPEdit TGSQL
+			var/datum/db_query/query_insert = SSdbcore.NewQuery(sql,sqlargs) //CHOMPEdit TGSQL
 			query_insert.Execute()
 			to_chat(usr, "<b>Thank you for your vote!</b>")
 			qdel(query_insert)
@@ -439,7 +455,7 @@
 	if (src != usr)
 		return 0
 	if(!ticker || ticker.current_state != GAME_STATE_PLAYING)
-		to_chat(usr, "<font color='red'>The round is either not ready, or has already finished...</font>")
+		to_chat(usr, span_red("The round is either not ready, or has already finished..."))
 		return 0
 	if(!config.enter_allowed)
 		to_chat(usr, "<span class='notice'>There is an administrative lock on entering the game!</span>")
@@ -538,6 +554,10 @@
 	//CHOMPEdit Begin - non-crew join don't get a message
 	if(rank == JOB_OUTSIDER)
 		log_and_message_admins("has joined the round as non-crew. (<A HREF='?_src_=holder;[HrefToken()];adminplayerobservecoodjump=1;X=[T.x];Y=[T.y];Z=[T.z]'>JMP</a>)",character)
+		if(!(J.mob_type & JOB_SILICON))
+			ticker.minds += character.mind
+	else if(rank == JOB_ANOMALY)
+		log_and_message_admins("has joined the round as anomaly. (<A HREF='?_src_=holder;[HrefToken()];adminplayerobservecoodjump=1;X=[T.x];Y=[T.y];Z=[T.z]'>JMP</a>)",character)
 		if(!(J.mob_type & JOB_SILICON))
 			ticker.minds += character.mind
 	//CHOMPEdit End

@@ -21,6 +21,8 @@
 
 	var/show_examine = TRUE	// Does this pop up on a mob when the mob is examined?
 
+	var/redgate_allowed = TRUE	//can we be taken through the redgate, in either direction?
+
 /obj/Destroy()
 	STOP_PROCESSING(SSobj, src)
 
@@ -36,6 +38,17 @@
 				m.forceMove(get_turf(src.loc))
 			m.visible_message("<span class = 'notice'>\The [m] tumbles out of \the [src]!</span>")
 	//VOREStation Add End
+
+	//CHOMPAdd Start possessed item cleanup
+	if(istype(src, /obj/item))
+		var/obj/item/I = src
+		if(I.possessed_voice && I.possessed_voice.len)
+			for(var/mob/living/voice/V in I.possessed_voice)
+				if(!V.tf_mob_holder)
+					V.ghostize(0)
+					V.stat = DEAD //CHOMPAdd - Helps with autosleeving
+					V.Destroy()
+	//CHOMPAdd End
 
 	return ..()
 
